@@ -1,0 +1,82 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeTeach</title>
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="Code Teaching Application" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <script>
+        // Enhanced theme handling
+        (function() {
+            const theme = localStorage.getItem('app-theme') || 'dark';
+            const root = document.documentElement;
+            
+            // Apply theme immediately
+            if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                root.classList.add('dark');
+            }
+
+            // Listen for system theme changes
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                if (theme === 'system') {
+                    root.classList.toggle('dark', e.matches);
+                }
+            });
+        })();
+    </script>
+    <style>
+        /* Enhanced transitions and theme colors */
+        :root {
+            --bg-light: #f3f4f6;
+            --bg-dark-start: #111827;
+            --bg-dark-end: #1f2937;
+        }
+
+        * {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            opacity: 1;
+            transition: background-color 0.3s ease, opacity 0.3s ease;
+        }
+
+        .dark body {
+            background: linear-gradient(to bottom right, var(--bg-dark-start), var(--bg-dark-end));
+        }
+
+        /* Prevent white flash during route changes */
+        #root {
+            min-height: 100vh;
+            background: inherit;
+        }
+
+        /* Optional: Add smooth page transitions */
+        .page-transition-enter {
+            opacity: 0;
+        }
+
+        .page-transition-enter-active {
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .page-transition-exit {
+            opacity: 1;
+        }
+
+        .page-transition-exit-active {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+</body>
+</html>
