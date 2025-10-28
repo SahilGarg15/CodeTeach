@@ -33,7 +33,9 @@ const ProtectedRoute = ({ children }) => {
 // Public Route Component
 const PublicRoute = ({ children }) => {
   if (isAuthenticated()) {
-    return <Navigate to="/learning-dashboard" replace />;
+    const user = JSON.parse(localStorage.getItem('user'));
+    const redirectTo = user?.role === 'admin' ? '/admin' : '/learning-dashboard';
+    return <Navigate to={redirectTo} replace />;
   }
   return children;
 };
@@ -47,7 +49,9 @@ const CourseSelector = () => {
     const fetchCourseDetails = async () => {
       try {
         setLoading(true);
-        const coursesData = await apiRequest(config.api.endpoints.courses.list);
+        const response = await apiRequest(config.api.endpoints.courses.list);
+        // Backend returns { success: true, data: courses }
+        const coursesData = response.data || response.courses || [];
         const course = coursesData.find(c => c._id === courseId);
         
         if (course) {
@@ -101,7 +105,7 @@ const CourseSelector = () => {
 
 const App = () => {
   const user = JSON.parse(localStorage.getItem('user'));
-  const isAdmin = user?.isAdmin;
+  const isAdmin = user?.role === 'admin' || user?.isAdmin === true;
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="app-theme">
@@ -115,35 +119,35 @@ const App = () => {
               </PublicRoute>
             } />
 
-            {/* Admin Routes */}
+            {/* Admin Routes - Admin Dashboard for management */}
             <Route path="/admin/*" element={
               <AdminRoute>
                 <AdminPanel />
               </AdminRoute>
             } />
 
-            {/* User Routes - Only accessible if not admin */}
-            {!isAdmin && (
-              <>
-                <Route path="/" element={<Home />} />
-                <Route path="/homepage" element={<Home />} />
-                <Route path="/courses" element={<Courses />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/learning-dashboard" element={
-                  <ProtectedRoute>
-                    <LearningDashboard />
-                  </ProtectedRoute>
-                } />
-                <Route path="/course/:courseId/*" element={
-                  <ProtectedRoute>
-                    <CourseSelector />
-                  </ProtectedRoute>
-                } />
-              </>
-            )}
+            {/* Public Routes - Accessible to all authenticated users */}
+            <Route path="/" element={<Home />} />
+            <Route path="/homepage" element={<Home />} />
+            <Route path="/courses" element={<Courses />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            
+            {/* Learning Dashboard - For all users (including admins) to take courses */}
+            <Route path="/learning-dashboard" element={
+              <ProtectedRoute>
+                <LearningDashboard />
+              </ProtectedRoute>
+            } />
+            
+            {/* Course Content - Accessible to all enrolled users */}
+            <Route path="/course/:courseId/*" element={
+              <ProtectedRoute>
+                <CourseSelector />
+              </ProtectedRoute>
+            } />
 
-            {/* Redirect admin to admin panel, others to home */}
+            {/* Default Redirect - Admin to admin panel, others to home */}
             <Route path="*" element={
               <Navigate to={isAdmin ? "/admin" : "/"} replace />
             } />

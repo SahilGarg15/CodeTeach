@@ -3,12 +3,11 @@ import { Navigate } from 'react-router-dom';
 const AdminRoute = ({ children }) => {
   const user = JSON.parse(localStorage.getItem('user'));
   
-  if (!user || !user.isAdmin) {
+  // Check if user is admin by role field
+  const isAdmin = user?.role === 'admin' || user?.isAdmin === true;
+  
+  if (!user || !isAdmin) {
     return <Navigate to="/auth" replace />;
-  }
-
-  if (user.isAdmin && window.location.pathname !== '/admin') {
-    return <Navigate to="/admin" replace />;
   }
 
   return children;

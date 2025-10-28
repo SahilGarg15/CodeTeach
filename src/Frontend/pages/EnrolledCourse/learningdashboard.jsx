@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, Clock, Award, XCircle, Code, Book, FileText } from 'lucide-react';
+import { BookOpen, Clock, Award, XCircle, Code, Book, FileText, TrendingUp, Target, CheckCircle } from 'lucide-react';
 import Header from '../../Components/Header';
 import { ThemeProvider } from '../../Components/ThemeProvider';
 import config from '../../../config/config';  // Default import
@@ -40,8 +40,12 @@ function LearningDashboard() {
         setIsLoading(true);
         const data = await apiRequest(config.api.endpoints.courses.enrolled);
         
-        // Handle the new response format
-        const courses = Array.isArray(data) ? data : (data.courses || []);
+        // Handle the response format: { success: true, data: enrollments }
+        // Each enrollment has a 'course' property with the course details
+        const enrollments = data.data || data.courses || [];
+        
+        // Extract courses from enrollments
+        const courses = enrollments.map(enrollment => enrollment.course).filter(Boolean);
         
         // Add module and test set counts for each course
         const coursesWithCounts = courses.map(course => {
@@ -173,19 +177,16 @@ function LearningDashboard() {
       return;
     }
   
-    // Get course modules - Move this outside try block so it's available in catch
+    // Get course modules
     const courseModules = getModulesForCourse(course.title);
     if (!courseModules) {
       console.error('No modules found for course:', course.title);
+      // If no modules found, just navigate to course page
+      navigate(`/course/${course._id}/modules`);
       return;
     }
 
     try {
-      // Update last accessed time
-      await apiRequest(config.api.endpoints.courses.lastAccessed(course._id), {
-        method: 'PUT'
-      });
-
       // Fetch current progress from backend
       const progressResponse = await apiRequest(config.api.endpoints.courses.progress(course._id), {
         method: 'GET'
@@ -193,10 +194,12 @@ function LearningDashboard() {
   
       // Log the response for debugging
       console.log('Progress response:', progressResponse);
+      
+      const progressData = progressResponse.data || progressResponse;
   
-      if (progressResponse?.completedModules?.length > 0) {
+      if (progressData?.completedModules?.length > 0) {
         // Find the last completed module
-        const lastCompletedId = progressResponse.completedModules[progressResponse.completedModules.length - 1];
+        const lastCompletedId = progressData.completedModules[progressData.completedModules.length - 1];
         const [lastModuleId, lastSubModuleId] = lastCompletedId.split('.');
   
         // Find the next module after the last completed one
@@ -207,7 +210,7 @@ function LearningDashboard() {
         // Search through modules to find the next uncompleted one
         for (const module of courseModules) {
           for (const subModule of module.subModules) {
-            if (found && !progressResponse.completedModules.includes(`${module.id}.${subModule.id}`)) {
+            if (found && !progressData.completedModules.includes(`${module.id}.${subModule.id}`)) {
               nextModule = module;
               nextSubModule = subModule;
               break;
@@ -227,8 +230,8 @@ function LearningDashboard() {
       }
   
       // If no completed modules or next module not found, check for last accessed
-      if (progressResponse?.lastVisited) {
-        const { moduleId, subModuleId } = progressResponse.lastVisited;
+      if (progressData?.lastVisited) {
+        const { moduleId, subModuleId } = progressData.lastVisited;
         navigate(`/course/${course._id}/modules/${moduleId}/${subModuleId}`);
         return;
       }
@@ -240,9 +243,8 @@ function LearningDashboard() {
   
     } catch (error) {
       console.error('Error handling course navigation:', error);
-      // Now courseModules is available in catch block
+      // Navigate to first module as fallback
       try {
-        // Navigate to first module as fallback
         const firstModule = courseModules[0];
         const firstSubModule = firstModule.subModules[0];
         navigate(`/course/${course._id}/modules/${firstModule.id}/${firstSubModule.id}`);
@@ -326,6 +328,59 @@ function LearningDashboard() {
             My Learning Dashboard
           </motion.h1>
           
+          {/* Statistics Cards */}
+          {enrolledCourses.length > 0 && (
+            <motion.div 
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
+            >
+              {/* Total Courses */}
+              <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-purple-100 text-sm font-medium">Total Courses</p>
+                    <h3 className="text-4xl font-bold mt-2">{enrolledCourses.length}</h3>
+                  </div>
+                  <div className="bg-white bg-opacity-20 rounded-full p-4">
+                    <BookOpen size={32} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Total Modules */}
+              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-blue-100 text-sm font-medium">Total Modules</p>
+                    <h3 className="text-4xl font-bold mt-2">
+                      {enrolledCourses.reduce((sum, course) => sum + (course.totalModules || 0), 0)}
+                    </h3>
+                  </div>
+                  <div className="bg-white bg-opacity-20 rounded-full p-4">
+                    <Target size={32} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Practice Sets */}
+              <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-green-100 text-sm font-medium">Practice Sets</p>
+                    <h3 className="text-4xl font-bold mt-2">
+                      {enrolledCourses.reduce((sum, course) => sum + (course.testSets || 0), 0)}
+                    </h3>
+                  </div>
+                  <div className="bg-white bg-opacity-20 rounded-full p-4">
+                    <CheckCircle size={32} />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+          
           <motion.div
             initial={false}
             animate={isLoading ? "hidden" : "show"}
@@ -337,20 +392,30 @@ function LearningDashboard() {
                 animate={{ opacity: 1 }}
                 className="text-center py-12"
               >
-                <div className="text-gray-600 dark:text-gray-400 text-xl">
-                  You haven't enrolled in any courses yet.
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-12 max-w-md mx-auto">
+                  <BookOpen size={64} className="mx-auto text-gray-400 mb-4" />
+                  <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-2">
+                    No Courses Yet
+                  </h2>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6">
+                    Start your learning journey today! Explore our courses and enroll in one that interests you.
+                  </p>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => window.location.href = '/courses'}
+                    className="px-8 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+                  >
+                    Browse Courses
+                  </motion.button>
                 </div>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => window.location.href = '/courses'}
-                  className="mt-4 px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
-                >
-                  Browse Courses
-                </motion.button>
               </motion.div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <>
+                <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-6">
+                  Your Enrolled Courses
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {enrolledCourses.map(course => (
                   <motion.div
                     key={course._id}
@@ -412,6 +477,7 @@ function LearningDashboard() {
                   
                 ))}
               </div>
+              </>
             )}
           </motion.div>
         </div>

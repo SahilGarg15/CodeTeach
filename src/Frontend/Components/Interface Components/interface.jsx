@@ -6,6 +6,7 @@ import CodingArea from './codingarea';  // Add this import
 import { motion, AnimatePresence } from 'framer-motion'; // Add this import
 import config from '../../../config/config';  // Default import
 import { apiRequest } from '../../../config/config';  // Named import
+import Header from '../Header'; // Add Header import
 // Internal ModuleButton component
 const ModuleButton = ({ module, isExpanded, toggleModule, completedModules }) => {
   const allSubModulesCompleted = module.subModules.every(
@@ -627,7 +628,8 @@ const CourseLayout = ({
 
   return (
     <>
-      <div className="flex flex-col md:flex-row h-screen bg-gray-950 overflow-hidden">
+      <Header />
+      <div className="flex flex-col md:flex-row h-screen bg-gray-950 overflow-hidden pt-16">
         {/* Remove the left-side menu button */}
         <div 
           className={`fixed md:relative z-40 h-full sidebar-transition

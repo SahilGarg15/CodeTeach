@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, memo } from 'react';
 import { useTheme } from './ThemeProvider';
-import { Moon, Sun, Menu, X, LogOut, ChevronDown } from 'lucide-react';
+import { Moon, Sun, Menu, X, LogOut, ChevronDown, BookOpen, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 // Memoize menu items to prevent unnecessary re-renders
@@ -212,10 +212,42 @@ const Header = memo(() => {
                         <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                           {user.email}
                         </p>
+                        {(user.role === 'admin' || user.isAdmin) && (
+                          <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full">
+                            Admin
+                          </span>
+                        )}
                       </div>
+                      
+                      {(user.role === 'admin' || user.isAdmin) && (
+                        <button
+                          onClick={() => {
+                            navigate('/admin');
+                            setIsDropdownOpen(false);
+                          }}
+                          className="w-full flex items-center px-4 py-2 text-sm text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900 font-medium"
+                        >
+                          <Shield className="w-4 h-4 mr-2" />
+                          Admin Panel
+                        </button>
+                      )}
+                      
+                      <button
+                        onClick={() => {
+                          navigate('/learning-dashboard');
+                          setIsDropdownOpen(false);
+                        }}
+                        className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        <BookOpen className="w-4 h-4 mr-2" />
+                        Learning Dashboard
+                      </button>
+                      
+                      <div className="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+                      
                       <button
                         onClick={handleLogout}
-                        className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        className="w-full flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900"
                       >
                         <LogOut className="w-4 h-4 mr-2" />
                         Sign out

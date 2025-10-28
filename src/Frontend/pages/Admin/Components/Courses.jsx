@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, BookOpen } from 'lucide-react';
 
 const CoursesComponent = ({ 
   courses, 
@@ -12,7 +12,8 @@ const CoursesComponent = ({
   setCourseForm, 
   handleEditCourse, 
   handleAddCourse, 
-  handleDeleteCourse 
+  handleDeleteCourse,
+  onManageModules
 }) => {
   return (
     <motion.div
@@ -40,27 +41,39 @@ const CoursesComponent = ({
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">{course.title}</h3>
               <div className="flex space-x-2">
                 <button
+                  onClick={() => onManageModules(course)}
+                  className="p-2 text-green-600 hover:bg-green-50 rounded-lg"
+                  title="Manage Modules"
+                >
+                  <BookOpen className="h-5 w-5" />
+                </button>
+                <button
                   onClick={() => {
                     setEditingCourse(course);
                     setCourseForm(course);
                   }}
                   className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                  title="Edit Course"
                 >
                   <Edit className="h-5 w-5" />
                 </button>
                 <button
                   onClick={() => handleDeleteCourse(course._id)}
                   className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                  title="Delete Course"
                 >
                   <Trash2 className="h-5 w-5" />
                 </button>
               </div>
             </div>
-            <p className="text-gray-600 dark:text-gray-300">{course.description}</p>
-            <div className="mt-4 space-y-2">
+            <p className="text-gray-600 dark:text-gray-300 mb-4">{course.description}</p>
+            <div className="space-y-2">
               <p className="text-sm text-gray-500">Category: {course.category}</p>
               <p className="text-sm text-gray-500">Duration: {course.duration}</p>
               <p className="text-sm text-gray-500">Price: ${course.price}</p>
+              <p className="text-sm text-gray-500">
+                Modules: {course.modules ? course.modules.length : 0}
+              </p>
             </div>
           </div>
         ))}

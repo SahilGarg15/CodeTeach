@@ -61,7 +61,7 @@ const AuthPage = () => {
 
   const handleLogin = async (values) => {
     try {
-      const response = await fetch(`${config.api.baseUrl}/auth/signin`, {
+      const response = await fetch(`${config.api.baseUrl}${config.api.endpoints.auth.signin}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -72,19 +72,17 @@ const AuthPage = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Login failed');
+        throw new Error(data.message || 'Login failed');
       }
 
-      // Store user data and token
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-
-      // Handle redirect based on user type
-      navigate(data.redirectTo || '/learning-dashboard');
+      // Backend sends OTP for login verification
+      setIsVerifying(true);
+      alert('Verification code sent to your email');
       
     } catch (error) {
       console.error('Login error:', error);
-      // Handle error display
+      setVerificationError(error.message || 'Login failed');
+      alert(error.message || 'Login failed');
     }
   };
 
@@ -135,14 +133,21 @@ const AuthPage = () => {
     setVerificationError('');
     
     try {
-      // For both email verification and password reset
-      const endpoint = isForgotPassword 
-        ? config.api.endpoints.auth.resetPassword
-        : config.api.endpoints.auth.verifyEmail;
-
-      const body = isForgotPassword
-        ? { email, otp, newPassword: password }
-        : { email, otp, sessionId }; // Include sessionId for email verification
+      let endpoint, body;
+      
+      if (isForgotPassword) {
+        // Password reset flow
+        endpoint = config.api.endpoints.auth.resetPassword;
+        body = { email, otp, newPassword: password };
+      } else if (isLogin) {
+        // Login OTP verification
+        endpoint = config.api.endpoints.auth.verifyLoginOtp;
+        body = { email, otp };
+      } else {
+        // Signup email verification
+        endpoint = config.api.endpoints.auth.verifyEmail;
+        body = { email, otp, sessionId, password, username };
+      }
 
       const response = await fetch(`${config.api.baseUrl}${endpoint}`, {
         method: 'POST',
@@ -161,10 +166,36 @@ const AuthPage = () => {
         setIsForgotPassword(false);
         setIsVerifying(false);
         setIsLogin(true);
+        setEmail('');
+        setPassword('');
+        setOtp('');
       } else {
-        setAuthToken(data.token);
-        setUser(data.user);
-        onAuthSuccess();
+        // Login or signup successful
+        console.log('Received data from backend:', data);
+        console.log('Token:', data.token);
+        console.log('User:', data.user);
+        
+        // Save to localStorage
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        // Verify data was saved
+        console.log('Token saved:', localStorage.getItem('token'));
+        console.log('User saved:', localStorage.getItem('user'));
+        
+        // Small delay to ensure localStorage is written
+        setTimeout(() => {
+          // Redirect based on user role
+          if (data.user.role === 'admin') {
+            console.log('Redirecting to /admin');
+            window.location.href = '/admin';
+          } else {
+            console.log('Redirecting to learning dashboard');
+            const params = new URLSearchParams(location.search);
+            const redirectUrl = params.get('redirect') || '/learning-dashboard';
+            window.location.href = redirectUrl;
+          }
+        }, 100);
       }
       
     } catch (error) {
@@ -175,10 +206,13 @@ const AuthPage = () => {
 
   const handleResendOTP = async () => {
     try {
+      // Determine the OTP type based on current flow
+      const type = isForgotPassword ? 'password-reset' : (isLogin ? 'login' : 'signup');
+      
       const response = await fetch(`${config.api.baseUrl}${config.api.endpoints.auth.resendOtp}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, type }),
       });
 
       const data = await response.json();
@@ -380,7 +414,7 @@ const AuthPage = () => {
       <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 p-4">
         <div className="w-full max-w-md bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg">
           <h2 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">
-            Verify Your Email
+            {isLogin ? 'Verify Login' : 'Verify Your Email'}
           </h2>
           <p className="text-center text-gray-600 dark:text-gray-300 mb-6">
             We've sent a verification code to {email}
@@ -402,7 +436,7 @@ const AuthPage = () => {
               type="submit"
               className="w-full py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
             >
-              Verify Email
+              {isLogin ? 'Verify & Login' : 'Verify Email'}
             </button>
           </form>
           <div className="mt-4 space-y-4">
@@ -420,7 +454,7 @@ const AuthPage = () => {
               }}
               className="w-full text-gray-600 hover:text-gray-700 text-sm"
             >
-              Go back to signup
+              {isLogin ? 'Go back to login' : 'Go back to signup'}
             </button>
           </div>
         </div>
@@ -473,7 +507,7 @@ const AuthPage = () => {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   minLength={3}
-                  pattern="[a-zA-Z0-9_-]+"
+                  pattern="[a-zA-Z0-9_\-]+"
                   title="Username can only contain letters, numbers, underscores and hyphens"
                 />
               </motion.div>

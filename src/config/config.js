@@ -11,6 +11,7 @@ const config = {
         signin: '/auth/signin',
         signup: '/auth/signup',
         verifyEmail: '/auth/verify-email',
+        verifyLoginOtp: '/auth/verify-login-otp',
         resendOtp: '/auth/resend-otp',
         forgotPassword: '/auth/forgot-password',
         resetPassword: '/auth/reset-password',
@@ -20,8 +21,7 @@ const config = {
         list: '/api/courses',
         enroll: (courseId) => `/api/courses/enroll/${courseId}`,
         enrolled: '/api/courses/enrolled',
-        progress: (courseId) => `/api/courses/progress/${courseId}`,
-        lastAccessed: (courseId) => `/api/courses/lastAccessed/${courseId}`
+        progress: (courseId) => `/api/courses/progress/${courseId}`
       },
       contact: {
         send: '/api/contact/send'

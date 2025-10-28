@@ -138,16 +138,20 @@ function CoursesPage() {
         setLoading(true);
         
         // Fetch all courses
-        const coursesData = await apiRequest(config.api.endpoints.courses.list);
-        setCourses(coursesData);
+        const coursesResponse = await apiRequest(config.api.endpoints.courses.list);
+        // Backend returns { success: true, data: courses }
+        const coursesData = coursesResponse.data || coursesResponse.courses || [];
+        setCourses(Array.isArray(coursesData) ? coursesData : []);
         
         // Only fetch enrolled courses if user is authenticated
         if (isAuthenticated()) {
           try {
             const enrolledData = await apiRequest(config.api.endpoints.courses.enrolled);
-            const enrolledCoursesData = enrolledData.courses || enrolledData;
-            const enrolledIds = (enrolledCoursesData || [])
-              .map(course => course._id?.toString())
+            // Backend returns { success: true, data: enrollments }
+            // Each enrollment has a 'course' object
+            const enrollments = enrolledData.data || [];
+            const enrolledIds = enrollments
+              .map(enrollment => enrollment.course?._id?.toString())
               .filter(Boolean);
             
             setEnrolledCourses(enrolledIds);
