@@ -613,24 +613,6 @@ Comprehensive configuration with 6 categories and 50+ settings:
    - Multi-language support
    - Payment configuration
 
----
-
-## 🎨 Screenshots
-
-### Home Page
-![Home Page](https://via.placeholder.com/800x400?text=Home+Page)
-
-### Course Listing
-![Courses](https://via.placeholder.com/800x400?text=Course+Listing)
-
-### Course Player
-![Course Player](https://via.placeholder.com/800x400?text=Course+Player)
-
-### Admin Dashboard
-![Admin Dashboard](https://via.placeholder.com/800x400?text=Admin+Dashboard)
-
-### Settings Panel
-![Settings](https://via.placeholder.com/800x400?text=Settings+Panel)
 
 ---
 
