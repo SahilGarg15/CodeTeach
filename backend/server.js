@@ -27,7 +27,6 @@ const app = express();
 // Allowed origins for CORS
 const allowedOrigins = [
   'http://localhost:3000',
-  'http://localhost:5173',
   process.env.FRONTEND_URL
 ].filter(Boolean);
 
@@ -68,7 +67,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // API Routes
-app.use('/auth', authRoutes); // Changed from /api/auth to /auth
+app.use('/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/enrollments', enrollmentRoutes);

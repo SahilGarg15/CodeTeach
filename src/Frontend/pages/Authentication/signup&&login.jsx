@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Book } from 'lucide-react';
 import config, { apiRequest, setAuthToken, setUser } from '../../../config/config';
-
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [isVerifying, setIsVerifying] = useState(false);
