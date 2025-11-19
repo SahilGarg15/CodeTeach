@@ -631,16 +631,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact & Support
 
-- **GitHub**: [Your GitHub Profile](https://github.com/yourusername)
-- **Email**: your.email@example.com
-- **Issues**: [GitHub Issues](https://github.com/yourusername/CodeTeach/issues)
+- **GitHub**: [Your GitHub Profile](https://github.com/SahilGarg15)
+- **Email**: gargsahil156@gmail.com
 
 ---
-
-<div align="center">
-
-Made with ❤️ by [Your Name]
-
-⭐ Star this project if you find it helpful!
-
-</div>
