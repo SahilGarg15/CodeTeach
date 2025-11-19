@@ -14,6 +14,12 @@ import progressRoutes from './routes/progressRoutes.js';
 import practiceRoutes from './routes/practiceRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import contactRoutes from './routes/contactRoutes.js';
+import reviewRoutes from './routes/reviewRoutes.js';
+import discussionRoutes from './routes/discussionRoutes.js';
+import quizRoutes from './routes/quizRoutes.js';
+import assignmentRoutes from './routes/assignmentRoutes.js';
+import certificateRoutes from './routes/certificateRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
 
 // Load environment variables
 dotenv.config();
@@ -75,6 +81,12 @@ app.use('/api/progress', progressRoutes);
 app.use('/api/practice', practiceRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/discussions', discussionRoutes);
+app.use('/api/quizzes', quizRoutes);
+app.use('/api/assignments', assignmentRoutes);
+app.use('/api/certificates', certificateRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

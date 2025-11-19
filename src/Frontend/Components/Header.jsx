@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback, memo } from 'react';
 import { useTheme } from './ThemeProvider';
-import { Moon, Sun, Menu, X, LogOut, ChevronDown, BookOpen, Shield } from 'lucide-react';
+import { Moon, Sun, Menu, X, LogOut, ChevronDown, BookOpen, Shield, Award, MessageSquare, ClipboardList, FileText, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { useLocation, Link, useNavigate, useParams } from 'react-router-dom';
+import NotificationCenter from './NotificationCenter';
 // Memoize menu items to prevent unnecessary re-renders
 const MENU_ITEMS = [
   { name: 'Home', href: '/' },
@@ -69,6 +70,19 @@ const Header = memo(() => {
   const [user, setUser] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
+  const { courseId } = useParams();
+
+  // Check if we're on a course page
+  const isCoursePage = location.pathname.startsWith('/course/');
+
+  // Course navigation items
+  const courseNavItems = courseId ? [
+    { path: `/course/${courseId}/modules`, icon: BookOpen, label: 'Modules' },
+    { path: `/course/${courseId}/discussions`, icon: MessageSquare, label: 'Discussions' },
+    { path: `/course/${courseId}/quizzes`, icon: ClipboardList, label: 'Quizzes' },
+    { path: `/course/${courseId}/assignments`, icon: FileText, label: 'Assignments' },
+    { path: `/course/${courseId}/reviews`, icon: Star, label: 'Reviews' },
+  ] : [];
 
   // Use useCallback to memoize theme toggle function
   const toggleTheme = useCallback(() => {
@@ -161,14 +175,47 @@ const Header = memo(() => {
           <div className="flex-1 flex justify-center">
             <nav className="hidden md:block">
               <ul className="flex space-x-1">
-                {MENU_ITEMS.map((item, index) => (
-                  <MenuItem
-                    key={item.name}
-                    item={{ ...item, index }}
-                    isActive={location.pathname === item.href}
-                    onClick={() => setIsMenuOpen(false)}
-                  />
-                ))}
+                {isCoursePage ? (
+                  // Show course navigation when on course page
+                  courseNavItems.map((item, index) => {
+                    const Icon = item.icon;
+                    const isActive = location.pathname.startsWith(item.path);
+                    return (
+                      <motion.li
+                        key={item.path}
+                        custom={index}
+                        variants={menuItemVariants}
+                        initial="initial"
+                        animate="animate"
+                      >
+                        <Link
+                          to={item.path}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-colors duration-200 relative group ${
+                            isActive 
+                              ? 'text-purple-600 dark:text-purple-400 font-semibold' 
+                              : 'text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400'
+                          }`}
+                        >
+                          <Icon className="w-4 h-4" />
+                          {item.label}
+                          <span className={`absolute inset-x-0 bottom-0 h-0.5 bg-purple-600 dark:bg-purple-400 transform ${
+                            isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                          } transition-transform duration-200 origin-left`}></span>
+                        </Link>
+                      </motion.li>
+                    );
+                  })
+                ) : (
+                  // Show regular navigation when not on course page
+                  MENU_ITEMS.map((item, index) => (
+                    <MenuItem
+                      key={item.name}
+                      item={{ ...item, index }}
+                      isActive={location.pathname === item.href}
+                      onClick={() => setIsMenuOpen(false)}
+                    />
+                  ))
+                )}
               </ul>
             </nav>
           </div>
@@ -184,6 +231,8 @@ const Header = memo(() => {
             >
               {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </motion.button>
+
+            {user && <NotificationCenter />}
 
             {user ? (
               <div className="relative user-dropdown">
@@ -242,6 +291,17 @@ const Header = memo(() => {
                         <BookOpen className="w-4 h-4 mr-2" />
                         Learning Dashboard
                       </button>
+
+                      <button
+                        onClick={() => {
+                          navigate('/my-certificates');
+                          setIsDropdownOpen(false);
+                        }}
+                        className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        <Award className="w-4 h-4 mr-2" />
+                        My Certificates
+                      </button>
                       
                       <div className="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                       
@@ -293,26 +353,56 @@ const Header = memo(() => {
           >
             <nav className="container mx-auto px-4 py-4">
               <ul className="space-y-2">
-                {MENU_ITEMS.map((item, index) => (
-                  <motion.li
-                    key={item.name}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.1 * index }}
-                  >
-                    <Link
-                      to={item.href}
-                      className={`block ${
-                        location.pathname === item.href 
-                          ? 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900 font-semibold' 
-                          : 'text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400'
-                      } px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 hover:bg-purple-50 dark:hover:bg-purple-900`}
-                      onClick={() => setIsMenuOpen(false)}
+                {isCoursePage ? (
+                  // Show course navigation in mobile menu when on course page
+                  courseNavItems.map((item, index) => {
+                    const Icon = item.icon;
+                    const isActive = location.pathname.startsWith(item.path);
+                    return (
+                      <motion.li
+                        key={item.path}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.1 * index }}
+                      >
+                        <Link
+                          to={item.path}
+                          className={`flex items-center gap-2 ${
+                            isActive 
+                              ? 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900 font-semibold' 
+                              : 'text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400'
+                          } px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 hover:bg-purple-50 dark:hover:bg-purple-900`}
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          <Icon className="w-5 h-5" />
+                          {item.label}
+                        </Link>
+                      </motion.li>
+                    );
+                  })
+                ) : (
+                  // Show regular menu items when not on course page
+                  MENU_ITEMS.map((item, index) => (
+                    <motion.li
+                      key={item.name}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 * index }}
                     >
-                      {item.name}
-                    </Link>
-                  </motion.li>
-                ))}
+                      <Link
+                        to={item.href}
+                        className={`block ${
+                          location.pathname === item.href 
+                            ? 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900 font-semibold' 
+                            : 'text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400'
+                        } px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 hover:bg-purple-50 dark:hover:bg-purple-900`}
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        {item.name}
+                      </Link>
+                    </motion.li>
+                  ))
+                )}
               </ul>
             </nav>
           </motion.div>

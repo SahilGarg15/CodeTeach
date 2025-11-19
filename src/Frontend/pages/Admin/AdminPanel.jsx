@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Users, BookOpen, LineChart, Settings, LogOut, Plus, Edit, Trash2, Menu, X } from 'lucide-react';
+import { Users, BookOpen, LineChart, Settings, LogOut, Plus, Edit, Trash2, Menu, X, FileQuestion, FileText, Code2, Award, MessageSquare } from 'lucide-react';
 import config from '../../../config/config';
 import UsersComponent from './Components/Users';
 import CoursesComponent from './Components/Courses';
 import ModuleForm from './Components/ModuleForm';
+import QuizManagement from './Components/QuizManagement';
+import AssignmentManagement from './Components/AssignmentManagement';
+import PracticeManagement from './Components/PracticeManagement';
+import CertificateManagement from './Components/CertificateManagement';
+import DiscussionModeration from './Components/DiscussionModeration';
 import Header from '../../Components/Header';
 
 const AdminPanel = () => {
@@ -100,6 +105,37 @@ const AdminPanel = () => {
     supportedLanguages: ['en'],
     moderateComments: true,
     allowAnonymousComments: false,
+    
+    // Quiz Settings
+    allowSkipQuestions: true,
+    showResultsImmediately: true,
+    randomizeQuestions: false,
+    randomizeOptions: true,
+    minimumQuizPassingScore: 70,
+    
+    // Assignment Settings
+    allowResubmission: true,
+    maxAssignmentFileSize: 10, // MB
+    allowedFileTypes: '.pdf,.doc,.docx,.zip,.jpg,.png',
+    autoGradeEnabled: false,
+    
+    // Practice Settings
+    hintsEnabled: true,
+    solutionsEnabled: true,
+    timeLimitEnabled: false,
+    leaderboardEnabled: true,
+    
+    // Certificate Settings
+    autoGenerateOnCompletion: true,
+    minimumCertificateScore: 70,
+    includeInstructorSignature: true,
+    allowSocialShare: true,
+    
+    // Discussion Settings
+    enableDiscussions: true,
+    moderateDiscussions: false,
+    allowAnonymousDiscussions: false,
+    maxDiscussionLength: 5000,
     
     // Payment Settings (if applicable)
     enablePayments: false,
@@ -495,6 +531,11 @@ const AdminPanel = () => {
     { id: 'dashboard', label: 'Dashboard', icon: LineChart },
     { id: 'users', label: 'Users', icon: Users },
     { id: 'courses', label: 'Courses', icon: BookOpen },
+    { id: 'quizzes', label: 'Quizzes', icon: FileQuestion },
+    { id: 'assignments', label: 'Assignments', icon: FileText },
+    { id: 'practice', label: 'Practice', icon: Code2 },
+    { id: 'certificates', label: 'Certificates', icon: Award },
+    { id: 'discussions', label: 'Discussions', icon: MessageSquare },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
@@ -659,6 +700,16 @@ const AdminPanel = () => {
             />
           )}
 
+          {activeTab === 'quizzes' && <QuizManagement />}
+
+          {activeTab === 'assignments' && <AssignmentManagement />}
+
+          {activeTab === 'practice' && <PracticeManagement />}
+
+          {activeTab === 'certificates' && <CertificateManagement />}
+
+          {activeTab === 'discussions' && <DiscussionModeration />}
+
           {activeTab === 'settings' && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -690,7 +741,7 @@ const AdminPanel = () => {
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
                 <div className="border-b border-gray-200 dark:border-gray-700">
                   <div className="flex overflow-x-auto">
-                    {['general', 'email', 'security', 'courses', 'system', 'advanced'].map((tab) => (
+                    {['general', 'email', 'security', 'courses', 'features', 'system', 'advanced'].map((tab) => (
                       <button
                         key={tab}
                         onClick={() => setSettingsTab(tab)}
@@ -1256,6 +1307,242 @@ const AdminPanel = () => {
                               </span>
                             </div>
                           </label>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Features Settings */}
+                  {settingsTab === 'features' && (
+                    <div className="space-y-6">
+                      {/* Quiz Settings */}
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quiz Settings</h3>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <label className="font-medium text-gray-700 dark:text-gray-300">Allow Skip Questions</label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Let students skip questions during quiz</p>
+                            </div>
+                            <input
+                              type="checkbox"
+                              checked={settingsForm.allowSkipQuestions}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, allowSkipQuestions: e.target.checked })}
+                              className="h-4 w-4 text-blue-600 rounded"
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <label className="font-medium text-gray-700 dark:text-gray-300">Show Results Immediately</label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Display results right after quiz submission</p>
+                            </div>
+                            <input
+                              type="checkbox"
+                              checked={settingsForm.showResultsImmediately}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, showResultsImmediately: e.target.checked })}
+                              className="h-4 w-4 text-blue-600 rounded"
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <label className="font-medium text-gray-700 dark:text-gray-300">Randomize Questions</label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Shuffle question order for each attempt</p>
+                            </div>
+                            <input
+                              type="checkbox"
+                              checked={settingsForm.randomizeQuestions}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, randomizeQuestions: e.target.checked })}
+                              className="h-4 w-4 text-blue-600 rounded"
+                            />
+                          </div>
+                          <div>
+                            <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
+                              Minimum Passing Score (%)
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={settingsForm.minimumQuizPassingScore}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, minimumQuizPassingScore: parseInt(e.target.value) })}
+                              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Assignment Settings */}
+                      <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Assignment Settings</h3>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <label className="font-medium text-gray-700 dark:text-gray-300">Allow Resubmission</label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Let students resubmit assignments</p>
+                            </div>
+                            <input
+                              type="checkbox"
+                              checked={settingsForm.allowResubmission}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, allowResubmission: e.target.checked })}
+                              className="h-4 w-4 text-blue-600 rounded"
+                            />
+                          </div>
+                          <div>
+                            <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
+                              Max File Size (MB)
+                            </label>
+                            <input
+                              type="number"
+                              min="1"
+                              max="100"
+                              value={settingsForm.maxAssignmentFileSize}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, maxAssignmentFileSize: parseInt(e.target.value) })}
+                              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
+                              Allowed File Types
+                            </label>
+                            <input
+                              type="text"
+                              value={settingsForm.allowedFileTypes}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, allowedFileTypes: e.target.value })}
+                              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                              placeholder=".pdf,.doc,.docx,.zip"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Practice Settings */}
+                      <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Practice Settings</h3>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <label className="font-medium text-gray-700 dark:text-gray-300">Enable Hints</label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Show hints for practice problems</p>
+                            </div>
+                            <input
+                              type="checkbox"
+                              checked={settingsForm.hintsEnabled}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, hintsEnabled: e.target.checked })}
+                              className="h-4 w-4 text-blue-600 rounded"
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <label className="font-medium text-gray-700 dark:text-gray-300">Enable Solutions</label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Allow viewing solutions after attempts</p>
+                            </div>
+                            <input
+                              type="checkbox"
+                              checked={settingsForm.solutionsEnabled}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, solutionsEnabled: e.target.checked })}
+                              className="h-4 w-4 text-blue-600 rounded"
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <label className="font-medium text-gray-700 dark:text-gray-300">Enable Leaderboard</label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Show practice leaderboard for motivation</p>
+                            </div>
+                            <input
+                              type="checkbox"
+                              checked={settingsForm.leaderboardEnabled}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, leaderboardEnabled: e.target.checked })}
+                              className="h-4 w-4 text-blue-600 rounded"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Certificate Settings */}
+                      <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Certificate Settings</h3>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <label className="font-medium text-gray-700 dark:text-gray-300">Auto-Generate on Completion</label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Automatically issue certificates when students complete courses</p>
+                            </div>
+                            <input
+                              type="checkbox"
+                              checked={settingsForm.autoGenerateOnCompletion}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, autoGenerateOnCompletion: e.target.checked })}
+                              className="h-4 w-4 text-blue-600 rounded"
+                            />
+                          </div>
+                          <div>
+                            <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
+                              Minimum Score for Certificate (%)
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={settingsForm.minimumCertificateScore}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, minimumCertificateScore: parseInt(e.target.value) })}
+                              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <label className="font-medium text-gray-700 dark:text-gray-300">Allow Social Share</label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Let students share certificates on social media</p>
+                            </div>
+                            <input
+                              type="checkbox"
+                              checked={settingsForm.allowSocialShare}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, allowSocialShare: e.target.checked })}
+                              className="h-4 w-4 text-blue-600 rounded"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Discussion Settings */}
+                      <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Discussion Settings</h3>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <label className="font-medium text-gray-700 dark:text-gray-300">Enable Discussions</label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Allow course discussions</p>
+                            </div>
+                            <input
+                              type="checkbox"
+                              checked={settingsForm.enableDiscussions}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, enableDiscussions: e.target.checked })}
+                              className="h-4 w-4 text-blue-600 rounded"
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <label className="font-medium text-gray-700 dark:text-gray-300">Moderate Discussions</label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Require admin approval for new discussions</p>
+                            </div>
+                            <input
+                              type="checkbox"
+                              checked={settingsForm.moderateDiscussions}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, moderateDiscussions: e.target.checked })}
+                              className="h-4 w-4 text-blue-600 rounded"
+                            />
+                          </div>
+                          <div>
+                            <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
+                              Max Discussion Length (characters)
+                            </label>
+                            <input
+                              type="number"
+                              min="100"
+                              max="10000"
+                              value={settingsForm.maxDiscussionLength}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, maxDiscussionLength: parseInt(e.target.value) })}
+                              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>

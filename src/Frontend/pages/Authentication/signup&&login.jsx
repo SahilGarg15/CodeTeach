@@ -12,7 +12,7 @@ const AuthPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [username, setUsername] = useState('');
   const [otp, setOtp] = useState('');
-  const [resetStep, setResetStep] = useState('email'); // 'email', 'otp', 'newPassword'
+  const [resetStep, setResetStep] = useState('email'); 
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [sessionId, setSessionId] = useState('');

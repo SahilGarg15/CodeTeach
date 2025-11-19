@@ -10,6 +10,8 @@ import {
   getDashboardStats,
   getAllEnrollments
 } from '../controllers/adminController.js';
+import Certificate from '../models/Certificate.js';
+import Discussion from '../models/Discussion.js';
 import { protect, authorize } from '../middleware/auth.js';
 import { createCourseValidation, validate } from '../middleware/validation.js';
 
@@ -32,6 +34,41 @@ router.delete('/courses/:courseId', deleteCourse);
 
 // Enrollment management
 router.get('/enrollments', getAllEnrollments);
+
+// Certificate management
+router.get('/certificates', async (req, res, next) => {
+  try {
+    const certificates = await Certificate.find()
+      .populate('user', 'firstName lastName email')
+      .populate('course', 'title')
+      .sort({ issuedDate: -1 });
+    
+    res.status(200).json({
+      success: true,
+      data: certificates
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Discussion management
+router.get('/discussions', async (req, res, next) => {
+  try {
+    const discussions = await Discussion.find()
+      .populate('author', 'firstName lastName email')
+      .populate('course', 'title')
+      .populate('replies.author', 'firstName lastName')
+      .sort({ createdAt: -1 });
+    
+    res.status(200).json({
+      success: true,
+      data: discussions
+    });
+  } catch (error) {
+    next(error);
+  }
+});
 
 // Dashboard statistics
 router.get('/stats', getDashboardStats);
